@@ -1,13 +1,8 @@
-import json
+from lexParser import Lexer
 
-from antlr4 import *
-
-from gen.sqlGrammarLexer import sqlGrammarLexer
 
 def recursiveDescentParser(text):
-    # dados = InputStream(htmlText)
-    data = InputStream('INSERT INTO jogadores (nome, idade, CPF) VALUES ("josicreuson", 1900, 00000000011);')
-    lexer = sqlGrammarLexer(data)
+    lexer = Lexer(text)
 
     token = lexer.nextToken()
     print(token)
@@ -15,22 +10,25 @@ def recursiveDescentParser(text):
         token = lexer.nextToken()
         if token.text == "DATABASE":
             token = lexer.nextToken()
-            if token.type == getTokenType("ID"):
-                return True
+            if token.type == "ID":
+                if lexer.nextToken().text == ";":
+                    return True
+                else:
+                    return False
             else:
                 return False
         elif token.text == "TABLE":
             token = lexer.nextToken()
-            if token.type == getTokenType("ID"):
+            if token.type == "ID":
                 token = lexer.nextToken()
                 if token.text == "(":
                     token = lexer.nextToken()
 
                     while token.text != ")":
-                        if token.type == getTokenType("ID"):
+                        if token.type == "ID":
                             token = lexer.nextToken()
 
-                            if token.type == getTokenType("TYPE"):
+                            if token.type == "TYPE":
                                 token = lexer.nextToken()
 
                                 if token.text == ",":
@@ -60,21 +58,24 @@ def recursiveDescentParser(text):
             return False
     elif token.text == "USE":
         token = lexer.nextToken()
-        if token.type == getTokenType("ID"):
-            return True
+        if token.type == "ID":
+            if lexer.nextToken().text == ";":
+                return True
+            else:
+                return False
         else:
             return False
     elif token.text == "UPDATE":
         token = lexer.nextToken()
-        if token.type == getTokenType("ID"):
+        if token.type == "ID":
             token = lexer.nextToken()
             if token.text == "SET":
                 token = lexer.nextToken()
-                if token.type == getTokenType("ID"):
+                if token.type == "ID":
                     token = lexer.nextToken()
                     if token.text == "=":
                         token = lexer.nextToken()
-                        if token.type == getTokenType("VALUE"):
+                        if token.type == "VALUE":
                             token = lexer.nextToken()
 
                             return recognizeWhere(token, lexer)
@@ -89,12 +90,12 @@ def recursiveDescentParser(text):
         else:
             return False
     elif token.text == "SELECT":
-        return isSelect(token, lexer)
+        return recognizeSelect(token, lexer)
     elif token.text == "DELETE":
         token = lexer.nextToken()
         if token.text == "FROM":
             token = lexer.nextToken()
-            if token.type == getTokenType("ID"):
+            if token.type == "ID":
                 token = lexer.nextToken()
                 if token.text == "WHERE":
                     return recognizeWhere(token, lexer)
@@ -106,7 +107,7 @@ def recursiveDescentParser(text):
         token = lexer.nextToken()
         if token.text == "TABLE":
             token = lexer.nextToken()
-            if token.type == getTokenType("ID"):
+            if token.type == "ID":
                 token = lexer.nextToken()
 
                 if token.text == ";":
@@ -121,14 +122,14 @@ def recursiveDescentParser(text):
         token = lexer.nextToken()
         if token.text == "INTO":
             token = lexer.nextToken()
-            if token.type == getTokenType("ID"):
+            if token.type == "ID":
                 token = lexer.nextToken()
 
                 if token.text == "(":
                     token = lexer.nextToken()
 
                     while token.text != ")":
-                        if token.type == getTokenType("ID"):
+                        if token.type == "ID":
                             token = lexer.nextToken()
 
                             if token.text == ",":
@@ -150,7 +151,7 @@ def recursiveDescentParser(text):
                             token = lexer.nextToken()
 
                             while token.text != ")":
-                                if token.type == getTokenType("VALUE"):
+                                if token.type == "VALUE":
                                     token = lexer.nextToken()
 
                                     if token.text == ",":
@@ -185,11 +186,11 @@ def recursiveDescentParser(text):
 def recognizeWhere(token, lexer):
     if token.text == "WHERE":
         token = lexer.nextToken()
-        if token.type == getTokenType("ID"):
+        if token.type == "ID":
             token = lexer.nextToken()
             if token.text == "=" or token.text == ">" or token.text == "<" or token.text == ">=" or token.text == "<=" or token.text == "!=":
                 token = lexer.nextToken()
-                if token.type == getTokenType("VALUE"):
+                if token.type == "VALUE":
                     token = lexer.nextToken()
 
                     if token.text == ";":
@@ -209,14 +210,15 @@ def recognizeWhere(token, lexer):
 def recognizeFrom(token, lexer):
     if token.text == "FROM":
         token = lexer.nextToken()
-        if token.type == getTokenType("ID"):
+        if token.type == "ID":
             return True
         else:
             return False
     else:
         return False
 
-def isSelect(token, lexer):
+
+def recognizeSelect(token, lexer):
     if token.text == "SELECT":
         token = lexer.nextToken()
         if token.text == "*":
@@ -229,7 +231,7 @@ def isSelect(token, lexer):
                     token = lexer.nextToken()
                     if token.text == "BY":
                         token = lexer.nextToken()
-                        if token.type == getTokenType("ID"):
+                        if token.type == "ID":
                             token = lexer.nextToken()
 
                             if token.text == ";":
@@ -247,7 +249,7 @@ def isSelect(token, lexer):
 
                 return False
         while token.text != "FROM":
-            if token.type == getTokenType("ID"):
+            if token.type == "ID":
                 token = lexer.nextToken()
                 if token.text == ",":
                     token = lexer.nextToken()
@@ -259,7 +261,7 @@ def isSelect(token, lexer):
                 return False
         if token.text == "FROM":
             token = lexer.nextToken()
-            if token.type == getTokenType("ID"):
+            if token.type == "ID":
                 token = lexer.nextToken()
 
                 if token.text == ";":
@@ -273,10 +275,5 @@ def isSelect(token, lexer):
     else:
         return False
 
-def getTokenType(tokenName):
-    with open("./gen/sqlGrammar.tokens", 'r') as grammar:
-        for line in grammar:
-            if tokenName.upper() in line:
-                return int(line.split("=")[1].strip())
 
-print(recursiveDescentParser('a'))
+print(recursiveDescentParser('DELETE FROM jogadores WHERE nome = "amarildo"'))
