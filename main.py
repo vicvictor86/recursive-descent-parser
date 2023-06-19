@@ -1,18 +1,18 @@
 from lexParser import Lexer
 
 
-def recursiveDescentParser(text):
-    lexer = Lexer(text)
-
+def recursiveDescentParser(lexer: Lexer) -> bool:
     token = lexer.nextToken()
-    print(token)
     if token.text == "CREATE":
         token = lexer.nextToken()
         if token.text == "DATABASE":
             token = lexer.nextToken()
             if token.type == "ID":
                 if lexer.nextToken().text == ";":
-                    return True
+                    if recursiveDescentParser(lexer):
+                        return True
+                    else:
+                        return False
                 else:
                     return False
             else:
@@ -47,7 +47,10 @@ def recursiveDescentParser(text):
                     token = lexer.nextToken()
 
                     if token.text == ";":
-                        return True
+                        if recursiveDescentParser(lexer):
+                            return True
+                        else:
+                            return False
                     else:
                         return False
                 else:
@@ -60,7 +63,10 @@ def recursiveDescentParser(text):
         token = lexer.nextToken()
         if token.type == "ID":
             if lexer.nextToken().text == ";":
-                return True
+                if recursiveDescentParser(lexer):
+                    return True
+                else:
+                    return False
             else:
                 return False
         else:
@@ -111,7 +117,10 @@ def recursiveDescentParser(text):
                 token = lexer.nextToken()
 
                 if token.text == ";":
-                    return True
+                    if recursiveDescentParser(lexer):
+                        return True
+                    else:
+                        return False
                 else:
                     return False
             else:
@@ -168,7 +177,10 @@ def recursiveDescentParser(text):
                             token = lexer.nextToken()
 
                             if token.text == ";":
-                                return True
+                                if recursiveDescentParser(lexer):
+                                    return True
+                                else:
+                                    return False
                             else:
                                 return False
                         else:
@@ -179,6 +191,8 @@ def recursiveDescentParser(text):
                 return False
         else:
             return False
+    elif token.text == "":
+        return True
     else:
         return False
 
@@ -194,7 +208,10 @@ def recognizeWhere(token, lexer):
                     token = lexer.nextToken()
 
                     if token.text == ";":
-                        return True
+                        if recursiveDescentParser(lexer):
+                            return True
+                        else:
+                            return False
                     else:
                         return False
                 else:
@@ -235,7 +252,10 @@ def recognizeSelect(token, lexer):
                             token = lexer.nextToken()
 
                             if token.text == ";":
-                                return True
+                                if recursiveDescentParser(lexer):
+                                    return True
+                                else:
+                                    return False
                             else:
                                 return False
                         else:
@@ -245,7 +265,10 @@ def recognizeSelect(token, lexer):
                 elif token.text == "WHERE":
                     return recognizeWhere(token, lexer)
                 elif token.text == ";":
-                    return True
+                    if recursiveDescentParser(lexer):
+                        return True
+                    else:
+                        return False
 
                 return False
         while token.text != "FROM":
@@ -265,7 +288,10 @@ def recognizeSelect(token, lexer):
                 token = lexer.nextToken()
 
                 if token.text == ";":
-                    return True
+                    if recursiveDescentParser(lexer):
+                        return True
+                    else:
+                        return False
                 else:
                     return False
             else:
@@ -276,4 +302,14 @@ def recognizeSelect(token, lexer):
         return False
 
 
-print(recursiveDescentParser('DELETE FROM jogadores WHERE nome = "amarildo"'))
+if __name__ == '__main__':
+    print(recursiveDescentParser(Lexer('CREATE DATABASE jogadores;' +
+                                       'USE jogadores;' +
+                                       'CREATE TABLE jogadores (nome string, idade int, CPF int);' +
+                                       'INSERT INTO jogadores (nome, idade, CPF) VALUES ("josicreuson", 1900, 00000000011);' +
+                                       'SELECT * FROM jogadores;' +
+                                       'SELECT nome, idade FROM jogadores;' +
+                                       'SELECT * FROM jogadores ORDER BY nome;' +
+                                       'SELECT * FROM jogadores WHERE idade > 9023;' +
+                                       'UPDATE jogadores SET nome = "josicreuson" WHERE nome = "victor";' +
+                                       'DELETE FROM jogadores WHERE nome = "amarildo";TRUNCATE TABLE jogadores;')))
