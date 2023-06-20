@@ -1,6 +1,5 @@
 from lexParser import Lexer
 
-
 def recursiveDescentParser(text):
     lexer = Lexer(text)
 
@@ -275,5 +274,5 @@ def recognizeSelect(token, lexer):
     else:
         return False
 
-
-print(recursiveDescentParser('DELETE FROM jogadores WHERE nome = "amarildo"'))
+if __name__ == "__main__":
+    print(recursiveDescentParser('DELETE FROM jogadores WHERE nome = "amarildo"'))
