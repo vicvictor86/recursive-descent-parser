@@ -2,45 +2,45 @@ import re
 
 tokens = \
     {
-        'CREATE': 'CREATE',
-        'DATABASE': 'DATABASE',
-        'INTO': 'INTO',
-        'USE': 'USE',
-        'TABLE': 'TABLE',
-        'INSERT': 'INSERT',
-        'SELECT': 'SELECT',
-        'FROM': 'FROM',
-        'ORDER': 'ORDER',
-        'BY': 'BY',
-        'WHERE': 'WHERE',
-        'UPDATE': 'UPDATE',
-        'SET': 'SET',
-        'DELETE': 'DELETE',
-        'TRUNCATE': 'TRUNCATE'
+        'CREATE': 'KEYWORD',
+        'DATABASE': 'KEYWORD',
+        'INTO': 'KEYWORD',
+        'USE': 'KEYWORD',
+        'TABLE': 'KEYWORD',
+        'INSERT': 'KEYWORD',
+        'SELECT': 'KEYWORD',
+        'FROM': 'KEYWORD',
+        'ORDER': 'KEYWORD',
+        'BY': 'KEYWORD',
+        'WHERE': 'KEYWORD',
+        'UPDATE': 'KEYWORD',
+        'SET': 'KEYWORD',
+        'DELETE': 'KEYWORD',
+        'TRUNCATE': 'KEYWORD'
     }
 specialTokens = \
     {
-        '(': '(',
-        ')': ')',
-        '<=': '<=',
-        '>=': '>=',
-        '=': '=',
-        '>': '>',
-        '<': '<',
-        ',': ',',
-        '*': '*',
-        ';': ';'
+        '(': 'SPECIAL_SYMBOL',
+        ')': 'SPECIAL_SYMBOL',
+        '<=': 'SPECIAL_SYMBOL',
+        '>=': 'SPECIAL_SYMBOL',
+        '=': 'SPECIAL_SYMBOL',
+        '>': 'SPECIAL_SYMBOL',
+        '<': 'SPECIAL_SYMBOL',
+        ',': 'SPECIAL_SYMBOL',
+        '*': 'SPECIAL_SYMBOL',
+        ';': 'SPECIAL_SYMBOL'
     }
 types = \
     {
-        'INT': 'INT',
-        'VARCHAR': 'VARCHAR',
-        'CHAR': 'CHAR',
-        'DATE': 'DATE',
-        'FLOAT': 'FLOAT',
-        'DOUBLE': 'DOUBLE',
-        'BOOLEAN': 'BOOLEAN',
-        'STRING': 'STRING'
+        'INT': 'TYPE',
+        'VARCHAR': 'TYPE',
+        'CHAR': 'TYPE',
+        'DATE': 'TYPE',
+        'FLOAT': 'TYPE',
+        'DOUBLE': 'TYPE',
+        'BOOLEAN': 'TYPE',
+        'STRING': 'TYPE'
     }
 
 
@@ -53,7 +53,7 @@ def isToken(text: str) -> tuple:
     elif text in specialTokens:
         token = (entry, specialTokens[text])
     elif text in types:
-        token = (entry, 'TYPE')
+        token = (entry, types[text])
     elif re.match(r'[a-zA-Z]+', text):
         token = (entry, 'ID')
     elif text[0] == '"' and text[-1] == '"' and len(text) > 1:
