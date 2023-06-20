@@ -1,315 +1,98 @@
+import tkinter as tk
+from recursiveDescentParser import recursiveDescentParser
+from tkinter import filedialog
+from tkinter import messagebox
 from lexParser import Lexer
 
-
-def recursiveDescentParser(lexer: Lexer) -> bool:
-    token = lexer.nextToken()
-    if token.text == "CREATE":
-        token = lexer.nextToken()
-        if token.text == "DATABASE":
-            token = lexer.nextToken()
-            if token.type == "ID":
-                if lexer.nextToken().text == ";":
-                    if recursiveDescentParser(lexer):
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        elif token.text == "TABLE":
-            token = lexer.nextToken()
-            if token.type == "ID":
-                token = lexer.nextToken()
-                if token.text == "(":
-                    token = lexer.nextToken()
-
-                    while token.text != ")":
-                        if token.type == "ID":
-                            token = lexer.nextToken()
-
-                            if token.type == "TYPE":
-                                token = lexer.nextToken()
-
-                                if token.text == ",":
-                                    token = lexer.nextToken()
-
-                                    continue
-                                elif token.text == ")":
-                                    break
-                                else:
-                                    return False
-                            else:
-                                return False
-                        else:
-                            return False
-
-                    token = lexer.nextToken()
-
-                    if token.text == ";":
-                        if recursiveDescentParser(lexer):
-                            return True
-                        else:
-                            return False
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-    elif token.text == "USE":
-        token = lexer.nextToken()
-        if token.type == "ID":
-            if lexer.nextToken().text == ";":
-                if recursiveDescentParser(lexer):
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-    elif token.text == "UPDATE":
-        token = lexer.nextToken()
-        if token.type == "ID":
-            token = lexer.nextToken()
-            if token.text == "SET":
-                token = lexer.nextToken()
-                if token.type == "ID":
-                    token = lexer.nextToken()
-                    if token.text == "=":
-                        token = lexer.nextToken()
-                        if token.type == "VALUE":
-                            token = lexer.nextToken()
-
-                            return recognizeWhere(token, lexer)
-                        else:
-                            return False
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-    elif token.text == "SELECT":
-        return recognizeSelect(token, lexer)
-    elif token.text == "DELETE":
-        token = lexer.nextToken()
-        if token.text == "FROM":
-            token = lexer.nextToken()
-            if token.type == "ID":
-                token = lexer.nextToken()
-                if token.text == "WHERE":
-                    return recognizeWhere(token, lexer)
-            else:
-                return False
-        else:
-            return False
-    elif token.text == "TRUNCATE":
-        token = lexer.nextToken()
-        if token.text == "TABLE":
-            token = lexer.nextToken()
-            if token.type == "ID":
-                token = lexer.nextToken()
-
-                if token.text == ";":
-                    if recursiveDescentParser(lexer):
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-    elif token.text == "INSERT":
-        token = lexer.nextToken()
-        if token.text == "INTO":
-            token = lexer.nextToken()
-            if token.type == "ID":
-                token = lexer.nextToken()
-
-                if token.text == "(":
-                    token = lexer.nextToken()
-
-                    while token.text != ")":
-                        if token.type == "ID":
-                            token = lexer.nextToken()
-
-                            if token.text == ",":
-                                token = lexer.nextToken()
-
-                                continue
-                            elif token.text == ")":
-                                break
-                            else:
-                                return False
-                        else:
-                            return False
-
-                    token = lexer.nextToken()
-
-                    if token.text == "VALUES":
-                        token = lexer.nextToken()
-                        if token.text == "(":
-                            token = lexer.nextToken()
-
-                            while token.text != ")":
-                                if token.type == "VALUE":
-                                    token = lexer.nextToken()
-
-                                    if token.text == ",":
-                                        token = lexer.nextToken()
-
-                                        continue
-                                    elif token.text == ")":
-                                        break
-                                    else:
-                                        return False
-                                else:
-                                    return False
-
-                            token = lexer.nextToken()
-
-                            if token.text == ";":
-                                if recursiveDescentParser(lexer):
-                                    return True
-                                else:
-                                    return False
-                            else:
-                                return False
-                        else:
-                            return False
-                    else:
-                        return False
-            else:
-                return False
-        else:
-            return False
-    elif token.text == "":
-        return True
+def open_file():
+    file_path = filedialog.askopenfilename(filetypes=[("SQL Files", "*.SQL")])
+    sql_code = ""
+    if file_path:
+        with open(file_path, 'r') as file:
+            for line in file:
+                try:
+                    index = line.index('\n')
+                    line = line[:index]
+                except:
+                    pass
+                sql_code += line
+            return sql_code
     else:
-        return False
+        return sql_code
 
+def popup_message(title, message, icon="info"):
+    messagebox.showinfo(title, message, icon=icon)
 
-def recognizeWhere(token, lexer):
-    if token.text == "WHERE":
-        token = lexer.nextToken()
-        if token.type == "ID":
-            token = lexer.nextToken()
-            if token.text == "=" or token.text == ">" or token.text == "<" or token.text == ">=" or token.text == "<=" or token.text == "!=":
-                token = lexer.nextToken()
-                if token.type == "VALUE":
-                    token = lexer.nextToken()
+def show_code():
+    sql_code = open_file()
+    lexer = Lexer(sql_code)
+    all_tokens = recursiveDescentParser(lexer)
 
-                    if token.text == ";":
-                        if recursiveDescentParser(lexer):
-                            return True
-                        else:
-                            return False
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
+    if all_tokens == True:
+        tokens_text.config(state=tk.NORMAL)
+        tokens_text.delete("1.0", tk.END)
+        
+        for token in lexer.tokens:
+            token_str = str(token) + " "
+            tokens_text.insert(tk.END, token_str)
+            if token[0] == ";":
+                tokens_text.insert(tk.END, "\n")
+        tokens_text.config(state=tk.DISABLED)
+        popup_message("SQL Tokens", "O código SQL é válido.", "info")
     else:
-        return False
+        tokens_text.config(state=tk.NORMAL)
+        tokens_text.delete("1.0", tk.END)
+        tokens_text.insert(tk.END, lexer.tokens)
+        tokens_text.config(state=tk.DISABLED)
+        popup_message("SQL Tokens", "O código SQL não é válido.", "warning")
 
+def change_cursor(event):
+    open_button.configure(cursor="hand2")
 
-def recognizeFrom(token, lexer):
-    if token.text == "FROM":
-        token = lexer.nextToken()
-        if token.type == "ID":
-            return True
-        else:
-            return False
-    else:
-        return False
+if __name__ == "__main__":
 
+    root = tk.Tk()
+    root.title("Análise de Códigos SQL")
+    root.geometry("800x600")
+    root.state("zoomed")
+    root.configure(bg="#1a1a1a")
 
-def recognizeSelect(token, lexer):
-    if token.text == "SELECT":
-        token = lexer.nextToken()
-        if token.text == "*":
-            token = lexer.nextToken()
+    frame = tk.Frame(root, bg="#1a1a1a")
+    frame.pack(pady=50)
 
-            if recognizeFrom(token, lexer):
-                token = lexer.nextToken()
+    open_button = tk.Button(
+        frame,
+        text="Abrir Arquivo",
+        font=("Arial", 14),
+        bg="#4682B4",
+        fg="white",
+        relief="flat",
+        padx=20,
+        pady=10,
+        command=show_code
+    )
+    open_button.pack(side=tk.BOTTOM)
+    open_button.bind("<Enter>", change_cursor)
 
-                if token.text == "ORDER":
-                    token = lexer.nextToken()
-                    if token.text == "BY":
-                        token = lexer.nextToken()
-                        if token.type == "ID":
-                            token = lexer.nextToken()
+    tokens_frame = tk.Frame(root, bg="#1a1a1a")
+    tokens_frame.pack()
 
-                            if token.text == ";":
-                                if recursiveDescentParser(lexer):
-                                    return True
-                                else:
-                                    return False
-                            else:
-                                return False
-                        else:
-                            return False
-                    else:
-                        return False
-                elif token.text == "WHERE":
-                    return recognizeWhere(token, lexer)
-                elif token.text == ";":
-                    if recursiveDescentParser(lexer):
-                        return True
-                    else:
-                        return False
+    tokens_label = tk.Label(
+        tokens_frame,
+        text="Tokens:",
+        font=("Arial", 16),
+        bg="#1a1a1a",
+        fg="white"
+    )
+    tokens_label.pack(pady=10)
 
-                return False
-        while token.text != "FROM":
-            if token.type == "ID":
-                token = lexer.nextToken()
-                if token.text == ",":
-                    token = lexer.nextToken()
-                elif token.text == "FROM":
-                    break
-                else:
-                    return False
-            else:
-                return False
-        if token.text == "FROM":
-            token = lexer.nextToken()
-            if token.type == "ID":
-                token = lexer.nextToken()
+    tokens_text = tk.Text(
+        tokens_frame,
+        width=80,
+        height=30,
+        font=("Arial", 12),
+        state=tk.DISABLED
+    )
+    tokens_text.pack()
 
-                if token.text == ";":
-                    if recursiveDescentParser(lexer):
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-    else:
-        return False
-
-
-if __name__ == '__main__':
-    print(recursiveDescentParser(Lexer('CREATE DATABASE jogadores;' +
-                                       'USE jogadores;' +
-                                       'CREATE TABLE jogadores (nome string, idade int, CPF int);' +
-                                       'INSERT INTO jogadores (nome, idade, CPF) VALUES ("josicreuson", 1900, 00000000011);' +
-                                       'SELECT * FROM jogadores;' +
-                                       'SELECT nome, idade FROM jogadores;' +
-                                       'SELECT * FROM jogadores ORDER BY nome;' +
-                                       'SELECT * FROM jogadores WHERE idade > 9023;' +
-                                       'UPDATE jogadores SET nome = "josicreuson" WHERE nome = "victor";' +
-                                       'DELETE FROM jogadores WHERE nome = "amarildo";TRUNCATE TABLE jogadores;')))
+    root.mainloop()
