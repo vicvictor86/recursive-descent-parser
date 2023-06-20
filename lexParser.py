@@ -33,14 +33,18 @@ specialTokens = \
     }
 types = \
     {
-        'INT': 26,
-        'FLOAT': 27,
-        'STRING': 28,
-        'BOOL': 29
+        'INT': 'INT',
+        'VARCHAR': 'VARCHAR',
+        'CHAR': 'CHAR',
+        'DATE': 'DATE',
+        'FLOAT': 'FLOAT',
+        'DOUBLE': 'DOUBLE',
+        'BOOLEAN': 'BOOLEAN',
+        'STRING': 'STRING'
     }
 
 
-def isToken(text: str):
+def isToken(text: str) -> tuple:
     entry = text
     text = text.upper()
     token = 'INVALID_TOKEN'
@@ -59,7 +63,7 @@ def isToken(text: str):
     return token
 
 
-def lexParser(text: str):
+def lexParser(text: str) -> list:
     identifiedTokens = []
     actual = ''
     for char in text:
@@ -80,23 +84,23 @@ def lexParser(text: str):
     return identifiedTokens
 
 
+class Token:
+    def __init__(self, text: str, type: str):
+        self.text = text
+        self.type = type
+
+
 class Lexer:
     def __init__(self, text: str):
         self.tokens = lexParser(text)
         self.position = 0
 
-    def nextToken(self):
+    def nextToken(self) -> Token:
         if self.position < len(self.tokens):
             self.position += 1
             return Token(self.tokens[self.position - 1][0], self.tokens[self.position - 1][1])
         else:
             return Token('', '')
-
-
-class Token:
-    def __init__(self, text: str, type: str):
-        self.text = text
-        self.type = type
 
 
 if __name__ == '__main__':
